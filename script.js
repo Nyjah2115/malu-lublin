@@ -151,11 +151,35 @@
   if (scena) {
     widocznosc(scena, 120, function (w) {
       if (w) scena.classList.add('is-in');
-      scena.classList.toggle('is-paused', !w);
+      scena.classList.toggle('is-paused', !w || document.hidden);
     });
     document.addEventListener('visibilitychange', function () {
       scena.classList.toggle('is-paused', document.hidden);
     });
+
+    /* na wąskim ekranie kafle jadą w pętli — duplikuję komplet, żeby nie było szwu */
+    var tor = document.getElementById('opTor');
+    if (tor) {
+      Array.prototype.slice.call(tor.children).forEach(function (el) {
+        var klon = el.cloneNode(true);
+        klon.classList.add('op-klon');
+        klon.setAttribute('aria-hidden', 'true');
+        tor.appendChild(klon);
+      });
+      /* stałe tempo bez względu na szerokość ekranu: px na sekundę */
+      var TEMPO = 34;
+      var ustawTempoOpinii = function () {
+        var polowa = tor.scrollWidth / 2;
+        if (polowa > 0) tor.style.setProperty('--tempo', (polowa / TEMPO).toFixed(1) + 's');
+      };
+      ustawTempoOpinii();
+      window.addEventListener('load', ustawTempoOpinii);
+      var tOp = null;
+      window.addEventListener('resize', function () {
+        clearTimeout(tOp);
+        tOp = setTimeout(ustawTempoOpinii, 250);
+      });
+    }
   }
 
   /* ---------------------------------------------------------------
