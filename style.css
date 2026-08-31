@@ -305,6 +305,7 @@ i{font-style:italic}
   position:relative;max-width:1180px;margin:0 auto;padding:40px 24px 20px;
   min-height:1010px;display:flex;align-items:center;justify-content:center;
 }
+.op-kafle{position:absolute;inset:0}
 .op-kafel{
   position:absolute;width:var(--szer);margin:0;z-index:1;
   background:#fff;border:1px solid var(--line);border-radius:22px;
@@ -357,21 +358,35 @@ i{font-style:italic}
 .opinie__cta svg{width:17px;height:17px;transition:transform .4s var(--ease)}
 .opinie__cta:hover svg{transform:translateX(4px)}
 
-/* poniżej 1080 px kafle nie mają gdzie latać — układają się w zwykłą siatkę */
+/* poniżej 1080 px kafle nie mają gdzie latać — jadą w przesuwanym pasku */
 @media(max-width:1080px){
-  .opinie__scena{
-    display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:center;
-    gap:16px;min-height:0;padding:20px 24px 0;
+  .opinie__scena{display:flex;flex-direction:column;align-items:stretch;min-height:0;padding:20px 0 0}
+  .opinie__srodek{order:-1;max-width:none;margin:0 auto;padding:0 24px}
+  .op-kafle{
+    position:static;display:flex;gap:14px;margin-top:34px;
+    padding:6px 24px 24px;overflow-x:auto;
+    scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
   }
-  .opinie__srodek{order:-1;flex:0 0 100%;max-width:none;margin-bottom:24px}
+  .op-kafle::-webkit-scrollbar{display:none}
   .op-kafel{
-    position:static!important;width:auto;flex:1 1 268px;
-    opacity:1;transform:none;animation:none!important;margin:0;
+    position:static!important;flex:0 0 min(300px,78vw);width:auto;
+    scroll-snap-align:center;margin:0;
+    opacity:1;animation:none!important;transform:rotate(var(--obrot));
   }
-  .op-kafel:hover{transform:none}
   .opinie__scena.is-in .op-kafel{animation:none}
-  .op-kafel__txt{-webkit-line-clamp:12}
+  .op-kafel:hover{transform:rotate(var(--obrot))}
+  .op-kafel__txt{-webkit-line-clamp:8}
+  /* podpowiedź, że pasek się przesuwa */
+  .op-kafle-wsk{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    margin-top:2px;font-size:.66rem;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--muted);
+  }
+  .op-kafle-wsk svg{width:15px;height:15px;animation:wskaz 1.9s ease-in-out infinite}
+  @keyframes wskaz{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
 }
+@media(min-width:1081px){.op-kafle-wsk{display:none}}
 @media(prefers-reduced-motion:reduce){
   .opinie__scena.is-in .op-kafel{animation:none;opacity:1;transform:none}
 }
