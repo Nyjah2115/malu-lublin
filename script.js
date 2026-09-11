@@ -3,6 +3,35 @@
   'use strict';
 
   /* --------------------------------------------------------------
+     Płynne przewijanie (Lenis). Zamiast skakać o każdy ząb kółka myszy,
+     strona dojeżdża do pozycji. Ustawienia te same co w ODNOVIE.
+     Gdyby plik się nie wczytał albo ktoś ma wyłączone animacje w systemie,
+     zostaje natywne przewijanie — nic się nie psuje.
+  ---------------------------------------------------------------*/
+  var bezRuchu = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var lenis = null;
+  if (window.Lenis && !bezRuchu) {
+    try {
+      lenis = new Lenis({ duration: 1.15, wheelMultiplier: 0.9, touchMultiplier: 1.6 });
+      var klatkaLenis = function (t) { lenis.raf(t); requestAnimationFrame(klatkaLenis); };
+      requestAnimationFrame(klatkaLenis);
+    } catch (e) { lenis = null; }
+  }
+
+  /* kotwice: #cennik, #galeria, „Do góry" itd. */
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (!a) return;
+    var cel = a.getAttribute('href');
+    if (!cel || cel === '#') return;
+    var el = document.querySelector(cel);
+    if (!el) return;
+    e.preventDefault();
+    if (lenis) lenis.scrollTo(el, { duration: 1.4 });
+    else el.scrollIntoView({ behavior: 'smooth' });
+  });
+
+  /* --------------------------------------------------------------
      Widoczność elementu. Nie polegam na samym IntersectionObserver —
      w części osadzonych przeglądarek nigdy nie odpala, a wtedy pół
      strony zostaje ukryte. Liczę z getBoundingClientRect przy scrollu.
@@ -468,11 +497,13 @@
       lb.classList.add('is-open');
       lb.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
+      if (lenis) lenis.stop();
     };
     var zamknij = function () {
       lb.classList.remove('is-open');
       lb.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
+      if (lenis) lenis.start();
     };
     gal.addEventListener('click', function (e) {
       if (e.target.closest('.gal__poz')) return;
